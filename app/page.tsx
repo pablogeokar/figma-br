@@ -1,9 +1,9 @@
-import { Room } from "./Room";
+import Live from "@/components/Live";
 
 export default function Page() {
   return (
-    <Room>
-      <h1 className="text-5xl text-white">Figma</h1>
-    </Room>
+    <div className="">
+      <Live />
+    </div>
   );
 }
