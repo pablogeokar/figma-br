@@ -80,7 +80,7 @@ const Live = ({ canvasRef }: Props) => {
 
   const broadcast = useBroadcastEvent();
 
-  useEventListener((eventData) => {
+  useEventListener((eventData: any) => {
     const event = eventData.event as ReactionEvent;
 
     setReaction((reactions) =>

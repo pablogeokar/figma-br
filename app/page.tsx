@@ -5,7 +5,7 @@ import LeftSidebar from "@/components/LeftSidebar";
 import Live from "@/components/Live";
 import Navbar from "@/components/Navbar";
 import RightSidebar from "@/components/RightSidebar";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   handleCanvasMouseDown,
   handleResize,
@@ -18,6 +18,11 @@ export default function Page() {
   const isDrawing = useRef(false);
   const shapeRef = useRef<fabric.Object | null>(null);
   const selectedShapeRef = useRef<string | null>(null);
+  const [activeElement, setActiveElement] = useState({
+    name: "",
+    value: "",
+    icon: "",
+  });
 
   useEffect(() => {
     // initialize the fabric canvas
