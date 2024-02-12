@@ -8,21 +8,41 @@ import RightSidebar from "@/components/RightSidebar";
 import { useEffect, useRef, useState } from "react";
 import {
   handleCanvasMouseDown,
+  handleCanvaseMouseMove,
   handleResize,
   initializeFabric,
 } from "@/lib/canvas";
+import { ActiveElement } from "@/types/type";
+import { useMutation, useStorage } from "@/liveblocks.config";
 
 export default function Page() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<fabric.Canvas | null>(null);
   const isDrawing = useRef(false);
   const shapeRef = useRef<fabric.Object | null>(null);
-  const selectedShapeRef = useRef<string | null>(null);
-  const [activeElement, setActiveElement] = useState({
+  const selectedShapeRef = useRef<string | null>("rectangle");
+  const [activeElement, setActiveElement] = useState<ActiveElement>({
     name: "",
     value: "",
     icon: "",
   });
+  const canvasObjects = useStorage((root) => root.canvasObjects);
+  const syncShapeInStorage = useMutation(({ storage }, object) => {
+    if (!object) return;
+
+    const { objectId } = object;
+    const shapeData = object.toJSON();
+    shapeData.objectId = objectId;
+
+    const canvasObjects = storage.get("canvasObjects");
+    canvasObjects.set(objectId, shapeData);
+  }, []);
+
+  const handleActiveElement = (elem: ActiveElement) => {
+    setActiveElement(elem);
+
+    selectedShapeRef.current = elem?.value as string;
+  };
 
   useEffect(() => {
     // initialize the fabric canvas
@@ -45,6 +65,17 @@ export default function Page() {
       });
     });
 
+    canvas.on("mouse:move", (options) => {
+      handleCanvaseMouseMove({
+        options,
+        canvas,
+        isDrawing,
+        shapeRef,
+        selectedShapeRef,
+        syncShapeInStorage,
+      });
+    });
+
     /**
      * listen to the resize event on the window which is fired when the
      * user resizes the window.
@@ -58,7 +89,10 @@ export default function Page() {
   }, []);
   return (
     <main className="h-screen overflow-hidden">
-      <Navbar />
+      <Navbar
+        activeElement={activeElement}
+        handleActiveElement={handleActiveElement}
+      />
       <section className="flex h-full flex-row">
         <LeftSidebar />
         <Live canvasRef={canvasRef} />
